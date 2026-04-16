@@ -141,8 +141,28 @@ An agent can reconstruct the full system state by reading: `CLAUDE.md` -> `specs
 
 - **Naming**: snake_case for modules and functions. PascalCase for classes.
 - **Imports**: Never import from infra/ui in domain/services. Only through ports.
-- **Commits**: Prefixes: `feat:`, `fix:`, `refactor:`, `test:`, `spec:`, `docs:`
+- **Commits**: Conventional commits enforced by pre-commit hook. Prefixes: `feat:`, `fix:`, `refactor:`, `test:`, `spec:`, `docs:`, `ci:`, `chore:`, `build:`
 - **Branches**: `feature/<name>`, `fix/<name>`, `refactor/<name>`
+
+---
+
+## CI & Quality Gates
+
+### Pre-Commit Hooks (`.pre-commit-config.yaml`)
+Run automatically on every commit:
+- Ruff (lint + format)
+- Mypy (type check)
+- Bandit (security scan)
+- Conventional commit message validation
+- No direct commits to `main`
+- Secret/large file detection
+
+Install: `pre-commit install --install-hooks`
+Run manually: `pre-commit run --all-files`
+
+### GitHub Actions (`.github/workflows/`)
+- **ci.yml**: Runs on push to `main` and on PRs. Jobs: lint, typecheck, test (matrix: 3 OS x 3 Python versions), coverage.
+- **pr-checks.yml**: Validates PR title convention and warns if ports/models changed without updating specs.
 
 ---
 

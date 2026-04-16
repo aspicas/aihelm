@@ -19,10 +19,27 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-### 3. Verify Everything Works
+### 3. Install Pre-Commit Hooks
+
+```bash
+pre-commit install --install-hooks
+```
+
+This installs hooks that run automatically on every commit:
+- **Trailing whitespace / EOF fixer** — clean formatting
+- **Ruff** — linting + auto-format (replaces Black, isort, flake8)
+- **Mypy** — static type checking
+- **Bandit** — security analysis
+- **Conventional commit** — enforces commit message format (`feat:`, `fix:`, etc.)
+- **No commit to main** — blocks direct pushes to `main`
+- **Large file check** — prevents files >500KB from being committed
+- **Secret detection** — blocks private keys from being committed
+
+### 4. Verify Everything Works
 
 ```bash
 pytest
+pre-commit run --all-files
 ```
 
 ## How to Contribute
@@ -144,9 +161,10 @@ refactor/<short-description>
 
 - **One concern per PR.** Don't mix a feature with an unrelated refactor.
 - **Include tests.** PRs without tests for new or changed behavior will be requested to add them.
-- **Update specs if needed.** If your change modifies a contract, schema, or business rule, update `specs/` in the same PR.
+- **Update specs if needed.** If your change modifies a contract, schema, or business rule, update `specs/` in the same PR. CI will warn you if ports/models changed without corresponding spec updates.
 - **Keep PRs reviewable.** Prefer smaller, focused PRs over large ones. If a change is big, break it into a series.
-- **Fill in the PR description.** Explain what changed, why, and how to test it.
+- **Fill in the PR template.** The repo includes a PR template with checklists — complete all relevant items.
+- **PR title must follow conventional commits.** Same format as commit messages (e.g., `feat: add queue reordering`). CI enforces this.
 
 ## Testing
 
