@@ -1,0 +1,60 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-title:
+    name: PR Title Convention
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title follows conventional commits
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            refactor
+            test
+            spec
+            docs
+            ci
+            chore
+            build
+          requireScope: false
+
+  changes:
+    name: Validate Changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check no secrets committed
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+
+      - name: Check spec consistency
+        run: |
+          # If code in domain/ports changed, specs/contracts should too
+          PORTS_CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD -- 'src/aihelm/domain/ports/' | wc -l)
+          CONTRACTS_CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD -- 'specs/contracts/' | wc -l)
+          if [ "$PORTS_CHANGED" -gt 0 ] && [ "$CONTRACTS_CHANGED" -eq 0 ]; then
+            echo "::warning::Ports changed but specs/contracts/ was not updated. Ensure contracts are still in sync."
+          fi
+
+          # If code in domain/models changed, specs/schemas should too
+          MODELS_CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD -- 'src/aihelm/domain/models/' | wc -l)
+          SCHEMAS_CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD -- 'specs/schemas/' | wc -l)
+          if [ "$MODELS_CHANGED" -gt 0 ] && [ "$SCHEMAS_CHANGED" -eq 0 ]; then
+            echo "::warning::Models changed but specs/schemas/ was not updated. Ensure schemas are still in sync."
+          fi
