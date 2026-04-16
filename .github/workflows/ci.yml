@@ -74,12 +74,20 @@ jobs:
         run: pytest tests/unit/ --tb=short
 
       - name: Run BDD tests
-        run: pytest tests/bdd/ --tb=short; rc=$?; [ $rc -eq 5 ] && exit 0 || exit $rc
         shell: bash
+        run: |
+          rc=0
+          pytest tests/bdd/ --tb=short || rc=$?
+          if [ $rc -eq 5 ]; then echo "No BDD tests yet, skipping"; exit 0; fi
+          exit $rc
 
       - name: Run integration tests
-        run: pytest tests/integration/ -m integration --tb=short; rc=$?; [ $rc -eq 5 ] && exit 0 || exit $rc
         shell: bash
+        run: |
+          rc=0
+          pytest tests/integration/ -m integration --tb=short || rc=$?
+          if [ $rc -eq 5 ]; then echo "No integration tests yet, skipping"; exit 0; fi
+          exit $rc
 
   coverage:
     name: Coverage
@@ -96,8 +104,12 @@ jobs:
         run: pip install -e ".[dev]"
 
       - name: Run tests with coverage
-        run: pytest tests/ --cov --cov-report=term-missing --cov-report=xml; rc=$?; [ $rc -eq 5 ] && exit 0 || exit $rc
         shell: bash
+        run: |
+          rc=0
+          pytest tests/ --cov --cov-report=term-missing --cov-report=xml || rc=$?
+          if [ $rc -eq 5 ]; then echo "No tests to cover, skipping"; exit 0; fi
+          exit $rc
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
