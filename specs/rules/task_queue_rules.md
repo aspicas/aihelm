@@ -27,6 +27,14 @@ Business invariants governing task creation and queue management.
 8. **Ordering:** Tasks in the queue are displayed and processed in `position` ascending order.
 9. **Branch uniqueness:** No two active tasks (status `queued` or `running`) may share the same `branch_name`. A branch name may be reused once the previous task using it has reached a terminal status (`done` or `failed`).
 
+## Edit Rules
+
+12. **Editable fields:** Only `name`, `prompt`, and `branch_name` may be edited. The fields `id`, `status`, `created_at`, and `position` are immutable after creation.
+13. **Edit precondition:** A task may only be edited when its status is `queued`. Attempting to edit a task in any other status must be rejected.
+14. **Validation on edit:** All creation-time validation rules (rules 2-4) apply equally to edited values. An edit that would produce an invalid task must be rejected, leaving the original task unchanged.
+15. **Branch uniqueness on edit:** Rule 9 (branch uniqueness among active tasks) applies to edits. The task being edited is excluded from the conflict check (a task may keep its own branch name).
+16. **Atomic edit:** An edit either succeeds entirely (all changed fields persisted) or fails entirely (no fields changed).
+
 ## Persistence Rules
 
 10. **Startup load:** On application startup, the queue is populated from the persisted storage.

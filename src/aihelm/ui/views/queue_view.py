@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import flet as ft
 
+from aihelm.domain.models.task import Task
 from aihelm.services.task_queue_service import TaskQueueService
 from aihelm.ui.components.task_card import TaskCard
 
@@ -9,9 +12,14 @@ from aihelm.ui.components.task_card import TaskCard
 class QueueView(ft.Column):
     """Left sidebar containing the task creation form and queue list."""
 
-    def __init__(self, queue_service: TaskQueueService) -> None:
+    def __init__(
+        self,
+        queue_service: TaskQueueService,
+        on_task_selected: Callable[[Task], None] | None = None,
+    ) -> None:
         super().__init__()
         self._queue_service = queue_service
+        self._on_task_selected = on_task_selected
 
         self._name_field = ft.TextField(
             label="Task Name",
@@ -94,9 +102,15 @@ class QueueView(ft.Column):
     def did_mount(self) -> None:
         self._load_queue()
 
+    def refresh_list(self) -> None:
+        """Reload the task list from the service."""
+        self._load_queue()
+
     def _load_queue(self) -> None:
         tasks = self._queue_service.list_all_tasks()
-        self._task_list.controls = [TaskCard(t) for t in tasks]
+        self._task_list.controls = [
+            TaskCard(t, on_click=self._on_task_selected) for t in tasks
+        ]
         self._task_list.update()
 
     def _on_add_click(self, _e: ft.Event[ft.Button]) -> None:
@@ -115,7 +129,9 @@ class QueueView(ft.Column):
             self._error_text.update()
             return
 
-        self._task_list.controls.append(TaskCard(task))
+        self._task_list.controls.append(
+            TaskCard(task, on_click=self._on_task_selected),
+        )
         self._task_list.update()
 
         self._name_field.value = ""

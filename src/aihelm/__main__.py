@@ -4,9 +4,10 @@ from pathlib import Path
 
 import flet as ft
 
+from aihelm.domain.models.task import Task
 from aihelm.infra.persistence import JsonTaskRepository
 from aihelm.services import TaskQueueService
-from aihelm.ui.views import QueueView
+from aihelm.ui.views import QueueView, TaskDetailView
 
 _DEFAULT_DATA_DIR = Path.home() / ".aihelm"
 _TASKS_FILE = _DEFAULT_DATA_DIR / "tasks.json"
@@ -21,7 +22,19 @@ def main(page: ft.Page) -> None:
 
     repo = JsonTaskRepository(path=_TASKS_FILE)
     queue_service = TaskQueueService(repo=repo)
-    queue_view = QueueView(queue_service=queue_service)
+
+    detail_view = TaskDetailView(
+        queue_service=queue_service,
+        on_task_updated=lambda _task: queue_view.refresh_list(),
+    )
+
+    def _on_task_selected(task: Task) -> None:
+        detail_view.show_task(task)
+
+    queue_view = QueueView(
+        queue_service=queue_service,
+        on_task_selected=_on_task_selected,
+    )
 
     page.add(
         ft.Row(
@@ -33,24 +46,8 @@ def main(page: ft.Page) -> None:
                     border=ft.border.only(right=ft.BorderSide(1, "#333333")),
                 ),
                 ft.Container(
-                    content=ft.Column(
-                        controls=[
-                            ft.Text(
-                                "AIHelm",
-                                size=24,
-                                weight=ft.FontWeight.BOLD,
-                                color="#666666",
-                            ),
-                            ft.Text(
-                                "Select a task to begin execution.",
-                                color="#555555",
-                            ),
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    ),
+                    content=detail_view,
                     expand=True,
-                    alignment=ft.Alignment(0, 0),
                 ),
             ],
             expand=True,
