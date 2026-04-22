@@ -74,6 +74,22 @@ class TaskQueueService:
         self._repo.save(updated)
         return updated
 
+    def delete_task(self, task_id: str) -> None:
+        """Delete a task from the queue.
+
+        Raises ValueError if the task is not found or is currently running.
+        """
+        existing = self._repo.get(task_id)
+        if existing is None:
+            msg = "Task not found"
+            raise ValueError(msg)
+
+        if existing.status == StatusEnum.RUNNING:
+            msg = "Cannot delete a running task"
+            raise ValueError(msg)
+
+        self._repo.delete(task_id)
+
     def list_queue(self) -> list[Task]:
         """Return all queued tasks ordered by position."""
         return self._repo.list_by_status(StatusEnum.QUEUED)

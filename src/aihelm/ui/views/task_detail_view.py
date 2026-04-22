@@ -17,10 +17,12 @@ class TaskDetailView(ft.Column):
         self,
         queue_service: TaskQueueService,
         on_task_updated: Callable[[Task], None] | None = None,
+        on_task_deleted: Callable[[], None] | None = None,
     ) -> None:
         super().__init__()
         self._queue_service = queue_service
         self._on_task_updated = on_task_updated
+        self._on_task_deleted = on_task_deleted
         self._current_task: Task | None = None
         self._editing = False
 
@@ -81,6 +83,18 @@ class TaskDetailView(ft.Column):
                     on_click=self._on_edit_click,
                     style=ft.ButtonStyle(
                         bgcolor="#0d6efd",
+                        color="#ffffff",
+                    ),
+                ),
+            )
+        if task.status != StatusEnum.RUNNING:
+            actions.append(
+                ft.Button(
+                    content=ft.Text("Delete"),
+                    icon=ft.Icons.DELETE,
+                    on_click=self._on_delete_click,
+                    style=ft.ButtonStyle(
+                        bgcolor="#dc3545",
                         color="#ffffff",
                     ),
                 ),
@@ -287,3 +301,57 @@ class TaskDetailView(ft.Column):
 
         if self._on_task_updated:
             self._on_task_updated(updated)
+
+    def _on_delete_click(self, _e: ft.Event[ft.Button]) -> None:
+        if self._current_task is None or self.page is None:
+            return
+
+        self._delete_dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Delete Task"),
+            content=ft.Text(
+                f'Are you sure you want to delete "{self._current_task.name}"?'
+            ),
+            actions=[
+                ft.TextButton(
+                    "Cancel",
+                    on_click=self._close_delete_dialog,
+                ),
+                ft.TextButton(
+                    "Delete",
+                    on_click=self._confirm_delete,
+                    style=ft.ButtonStyle(color="#dc3545"),
+                ),
+            ],
+        )
+        self.page.overlay.append(self._delete_dialog)
+        self._delete_dialog.open = True
+        self.page.update()
+
+    def _close_delete_dialog(self, _e: ft.Event[ft.TextButton]) -> None:
+        if self.page is None:
+            return
+        self._delete_dialog.open = False
+        self.page.update()
+
+    def _confirm_delete(self, _e: ft.Event[ft.TextButton]) -> None:
+        if self._current_task is None or self.page is None:
+            return
+
+        self._delete_dialog.open = False
+        self.page.update()
+
+        try:
+            self._queue_service.delete_task(self._current_task.id)
+        except ValueError:
+            return
+
+        self._current_task = None
+        self._editing = False
+        self.alignment = ft.MainAxisAlignment.CENTER
+        self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        self._show_empty_state()
+        self.update()
+
+        if self._on_task_deleted:
+            self._on_task_deleted()

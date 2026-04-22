@@ -240,6 +240,82 @@ class TestUpdateTask:
         assert stored.name == "New"
 
 
+class TestDeleteTask:
+    def test_deletes_queued_task(
+        self, repo: InMemoryTaskRepository, service: TaskQueueService
+    ) -> None:
+        task = service.add_task("T", "p", "feature/x")
+        service.delete_task(task.id)
+        assert repo.get(task.id) is None
+
+    def test_deletes_paused_task(
+        self, repo: InMemoryTaskRepository, service: TaskQueueService
+    ) -> None:
+        task = Task(
+            name="P",
+            prompt="p",
+            branch_name="feature/p",
+            status=StatusEnum.PAUSED,
+            position=0,
+        )
+        repo.save(task)
+        service.delete_task(task.id)
+        assert repo.get(task.id) is None
+
+    def test_deletes_done_task(
+        self, repo: InMemoryTaskRepository, service: TaskQueueService
+    ) -> None:
+        task = Task(
+            name="D",
+            prompt="p",
+            branch_name="feature/d",
+            status=StatusEnum.DONE,
+            position=0,
+        )
+        repo.save(task)
+        service.delete_task(task.id)
+        assert repo.get(task.id) is None
+
+    def test_deletes_failed_task(
+        self, repo: InMemoryTaskRepository, service: TaskQueueService
+    ) -> None:
+        task = Task(
+            name="F",
+            prompt="p",
+            branch_name="feature/f",
+            status=StatusEnum.FAILED,
+            position=0,
+        )
+        repo.save(task)
+        service.delete_task(task.id)
+        assert repo.get(task.id) is None
+
+    def test_rejects_deleting_running_task(
+        self, repo: InMemoryTaskRepository, service: TaskQueueService
+    ) -> None:
+        task = Task(
+            name="R",
+            prompt="p",
+            branch_name="feature/r",
+            status=StatusEnum.RUNNING,
+            position=0,
+        )
+        repo.save(task)
+        with pytest.raises(ValueError, match="Cannot delete a running task"):
+            service.delete_task(task.id)
+        assert repo.get(task.id) is not None
+
+    def test_rejects_deleting_nonexistent_task(self, service: TaskQueueService) -> None:
+        with pytest.raises(ValueError, match="Task not found"):
+            service.delete_task("nonexistent-id")
+
+    def test_releases_branch_for_reuse(self, service: TaskQueueService) -> None:
+        task = service.add_task("T", "p", "feature/reuse")
+        service.delete_task(task.id)
+        new_task = service.add_task("T2", "p2", "feature/reuse")
+        assert new_task.branch_name == "feature/reuse"
+
+
 class TestListAllTasks:
     def test_returns_all_statuses(
         self, repo: InMemoryTaskRepository, service: TaskQueueService

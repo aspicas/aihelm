@@ -26,6 +26,7 @@ def main(page: ft.Page) -> None:
     detail_view = TaskDetailView(
         queue_service=queue_service,
         on_task_updated=lambda _task: queue_view.refresh_list(),
+        on_task_deleted=lambda: queue_view.refresh_list(),
     )
 
     def _on_task_selected(task: Task) -> None:

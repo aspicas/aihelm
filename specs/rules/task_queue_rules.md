@@ -35,6 +35,12 @@ Business invariants governing task creation and queue management.
 15. **Branch uniqueness on edit:** Rule 9 (branch uniqueness among active tasks) applies to edits. The task being edited is excluded from the conflict check (a task may keep its own branch name).
 16. **Atomic edit:** An edit either succeeds entirely (all changed fields persisted) or fails entirely (no fields changed).
 
+## Delete Rules
+
+17. **Delete precondition:** A task may be deleted when its status is `queued`, `paused`, `done`, or `failed`. A `running` task cannot be deleted.
+18. **Delete is irreversible:** Once deleted, the task and its data are permanently removed from persistence.
+19. **Branch release on delete:** Deleting an active task (`queued`) releases its branch name for reuse.
+
 ## Persistence Rules
 
 10. **Startup load:** On application startup, the queue is populated from the persisted storage.
