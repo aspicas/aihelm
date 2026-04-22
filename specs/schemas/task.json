@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Task",
+  "description": "A unit of work to be executed by an AI code assistant.",
+  "type": "object",
+  "required": ["id", "name", "prompt", "branch_name", "status", "created_at", "position"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier (UUID v4), auto-generated on creation."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Human-readable task name."
+    },
+    "prompt": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Instructions for the AI code assistant."
+    },
+    "branch_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Target git branch name. Must conform to git-check-ref-format rules."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["queued", "running", "paused", "done", "failed"],
+      "default": "queued",
+      "description": "Current lifecycle state of the task."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of task creation."
+    },
+    "position": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Queue ordering. Lower positions are executed first."
+    }
+  },
+  "additionalProperties": false
+}
