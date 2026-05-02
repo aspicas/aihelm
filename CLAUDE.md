@@ -34,11 +34,11 @@ specs/                          # Source of truth (SDD)
 
 src/aihelm/                     # Python package (src layout)
   domain/
-    models/                     # Task, StatusEnum, RateLimitPattern, DiffResult
-    ports/                      # ABCs: TaskRepository, GitPort, SubprocessRunner, RateLimitDetector
-  services/                     # TaskQueueService, WorkerService, RateLimitService
+    models/                     # Task, StatusEnum, Workspace, RateLimitPattern, DiffResult
+    ports/                      # ABCs: TaskRepository, WorkspaceRepository, GitPort, SubprocessRunner, RateLimitDetector
+  services/                     # TaskQueueService, WorkspaceService, WorkerService, RateLimitService
   infra/
-    persistence/                # JsonTaskRepository (tasks.json)
+    persistence/                # JsonTaskRepository (tasks.json), JsonWorkspaceRepository (workspaces.json)
     subprocess/                 # Popen wrapper for claude-code
     git/                        # Git operations via shell
   ui/
@@ -64,6 +64,7 @@ tests/
 | Ports as ABCs | Dependency Inversion: domain defines contracts, infra implements them |
 | specs/ separate from code | SDD: specs are the source of truth, reviewed independently |
 | JSON for v1 persistence | YAGNI: SQLite is unnecessary for a local task queue |
+| Workspace state as persisted model | Restores active execution cwd at startup and enables future multi-project expansion |
 | No config/ directory | KISS: minimal configuration in v1, a single module suffices |
 | No event bus/mediator | KISS: 3 layers + UI is enough for a v1 desktop app |
 | Worker as daemon thread | SRS requirement: must not block the Flet event loop |

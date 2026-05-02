@@ -7,6 +7,7 @@ import flet as ft
 from aihelm.domain.models.status import StatusEnum
 from aihelm.domain.models.task import Task
 from aihelm.services.task_queue_service import TaskQueueService
+from aihelm.ui._runtime import is_mounted
 from aihelm.ui.components.status_badge import StatusBadge
 
 
@@ -126,7 +127,7 @@ class TaskDetailView(ft.Column):
                                 color="#cccccc",
                             ),
                             bgcolor="#1e1e1e",
-                            border=ft.border.all(1, "#333333"),
+                            border=ft.Border.all(1, "#333333"),
                             border_radius=8,
                             padding=12,
                         ),
@@ -303,7 +304,7 @@ class TaskDetailView(ft.Column):
             self._on_task_updated(updated)
 
     def _on_delete_click(self, _e: ft.Event[ft.Button]) -> None:
-        if self._current_task is None or self.page is None:
+        if self._current_task is None or not is_mounted(self):
             return
 
         self._delete_dialog = ft.AlertDialog(
@@ -324,18 +325,16 @@ class TaskDetailView(ft.Column):
                 ),
             ],
         )
-        self.page.overlay.append(self._delete_dialog)
-        self._delete_dialog.open = True
-        self.page.update()
+        self.page.show_dialog(self._delete_dialog)
 
     def _close_delete_dialog(self, _e: ft.Event[ft.TextButton]) -> None:
-        if self.page is None:
+        if not is_mounted(self):
             return
         self._delete_dialog.open = False
         self.page.update()
 
     def _confirm_delete(self, _e: ft.Event[ft.TextButton]) -> None:
-        if self._current_task is None or self.page is None:
+        if self._current_task is None or not is_mounted(self):
             return
 
         self._delete_dialog.open = False
