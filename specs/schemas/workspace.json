@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aihelm.dev/schemas/workspace.json",
+  "title": "Workspace",
+  "description": "Workspace selection metadata persisted by AIHelm.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "path", "name", "selected_at", "is_active"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique workspace identifier.",
+      "format": "uuid"
+    },
+    "path": {
+      "type": "string",
+      "description": "Absolute path to the project root directory.",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name for the workspace.",
+      "minLength": 1
+    },
+    "selected_at": {
+      "type": "string",
+      "description": "UTC timestamp for latest selection event.",
+      "format": "date-time"
+    },
+    "is_active": {
+      "type": "boolean",
+      "description": "Whether this workspace is the active execution target."
+    }
+  }
+}

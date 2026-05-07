@@ -51,7 +51,7 @@ class TaskCard(ft.Container):
                 spacing=4,
             ),
             padding=12,
-            border=ft.border.all(1, "#333333"),
+            border=ft.Border.all(1, "#333333"),
             border_radius=8,
             bgcolor="#1e1e1e",
             ink=True,

@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 
 import flet as ft
 
 from aihelm.domain.models.task import Task
 from aihelm.services.task_queue_service import TaskQueueService
+from aihelm.services.workspace_service import WorkspaceService
+from aihelm.ui._runtime import is_mounted
 from aihelm.ui.components.task_card import TaskCard
+from aihelm.ui.components.workspace_selector import WorkspaceSelector
+
+PickHandler = Callable[[], None] | Callable[[], Awaitable[None]]
 
 
 class QueueView(ft.Column):
@@ -15,11 +20,18 @@ class QueueView(ft.Column):
     def __init__(
         self,
         queue_service: TaskQueueService,
+        workspace_service: WorkspaceService,
+        on_select_project: PickHandler,
         on_task_selected: Callable[[Task], None] | None = None,
     ) -> None:
         super().__init__()
         self._queue_service = queue_service
+        self._workspace_service = workspace_service
         self._on_task_selected = on_task_selected
+        self._workspace_selector = WorkspaceSelector(
+            workspace_service=workspace_service,
+            on_pick=on_select_project,
+        )
 
         self._name_field = ft.TextField(
             label="Task Name",
@@ -48,6 +60,12 @@ class QueueView(ft.Column):
                 color="#ffffff",
             ),
         )
+        self._workspace_hint = ft.Text(
+            value="Select a project to enable task creation.",
+            color="#f59e0b",
+            size=12,
+            visible=False,
+        )
         self._error_text = ft.Text(
             value="",
             color="#dc3545",
@@ -70,9 +88,11 @@ class QueueView(ft.Column):
                             size=16,
                             weight=ft.FontWeight.BOLD,
                         ),
+                        self._workspace_selector,
                         self._name_field,
                         self._prompt_field,
                         self._branch_field,
+                        self._workspace_hint,
                         self._error_text,
                         self._add_button,
                     ],
@@ -100,6 +120,10 @@ class QueueView(ft.Column):
         ]
 
     def did_mount(self) -> None:
+        self._sync_workspace_state()
+        self._workspace_service.subscribe(
+            lambda _workspace: self._sync_workspace_state()
+        )
         self._load_queue()
 
     def refresh_list(self) -> None:
@@ -114,6 +138,10 @@ class QueueView(ft.Column):
         self._task_list.update()
 
     def _on_add_click(self, _e: ft.Event[ft.Button]) -> None:
+        if self._workspace_service.get_active() is None:
+            self._sync_workspace_state()
+            return
+
         name = (self._name_field.value or "").strip()
         prompt = (self._prompt_field.value or "").strip()
         branch = (self._branch_field.value or "").strip()
@@ -140,3 +168,11 @@ class QueueView(ft.Column):
         self._name_field.update()
         self._prompt_field.update()
         self._branch_field.update()
+
+    def _sync_workspace_state(self) -> None:
+        has_workspace = self._workspace_service.get_active() is not None
+        self._add_button.disabled = not has_workspace
+        self._workspace_hint.visible = not has_workspace
+        if is_mounted(self):
+            self._add_button.update()
+            self._workspace_hint.update()
