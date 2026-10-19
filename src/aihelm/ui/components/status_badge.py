@@ -34,5 +34,5 @@ class StatusBadge(ft.Container):
             ),
             bgcolor=_STATUS_COLORS.get(status, "#6c757d"),
             border_radius=12,
-            padding=ft.padding.symmetric(horizontal=8, vertical=2),
+            padding=ft.Padding(left=8, top=2, right=8, bottom=2),
         )
