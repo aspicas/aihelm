@@ -14,13 +14,14 @@ Business invariants governing workspace selection and persistence.
 
 6. **Startup load:** On app startup, the latest active workspace is loaded from persistence and shown in the UI.
 7. **No persisted value:** If no workspace is active, the app starts without an execution workspace selected.
+8. **Stale workspace:** A persisted workspace whose path no longer exists or is not a directory is ignored when loading: it is neither returned as active nor listed, and startup proceeds as in rule 7. The record is kept in storage, so it becomes visible again if the directory is restored.
 
 ## Execution Rules
 
-8. **Execution cwd source:** Command/process execution must resolve its `cwd` from the active workspace path.
-9. **No active workspace:** If there is no active workspace, execution features depending on `cwd` must not proceed silently.
+9. **Execution cwd source:** Command/process execution must resolve its `cwd` from the active workspace path.
+10. **No active workspace:** If there is no active workspace, execution features depending on `cwd` must not proceed silently.
 
 ## Persistence Rules
 
-10. **Immediate persistence:** Selecting or changing active workspace is persisted immediately.
-11. **Missing storage:** Missing workspace storage is treated as empty state.
+11. **Immediate persistence:** Selecting or changing active workspace is persisted immediately.
+12. **Missing storage:** Missing workspace storage is treated as empty state.

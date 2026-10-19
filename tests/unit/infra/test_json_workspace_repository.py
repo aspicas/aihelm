@@ -68,3 +68,43 @@ class TestFileIntegrity:
         raw = (tmp_path / "workspaces.json").read_text(encoding="utf-8")
         data = json.loads(raw)
         assert isinstance(data, list)
+
+
+class TestStaleEntries:
+    @pytest.fixture()
+    def stale_storage(self, tmp_path: Path) -> Path:
+        existing = tmp_path / "existing"
+        existing.mkdir()
+        storage = tmp_path / "workspaces.json"
+        storage.write_text(
+            json.dumps(
+                [
+                    {
+                        "id": "existing-id",
+                        "path": str(existing),
+                        "name": "existing",
+                        "selected_at": "2026-05-02T08:13:32+00:00",
+                        "is_active": False,
+                    },
+                    {
+                        "id": "stale-id",
+                        "path": str(tmp_path / "deleted"),
+                        "name": "deleted",
+                        "selected_at": "2026-05-08T23:55:07+00:00",
+                        "is_active": True,
+                    },
+                ]
+            ),
+            encoding="utf-8",
+        )
+        return storage
+
+    def test_get_active_ignores_stale_workspace(self, stale_storage: Path) -> None:
+        repo = JsonWorkspaceRepository(path=stale_storage)
+        assert repo.get_active() is None
+
+    def test_list_all_skips_stale_and_keeps_record(self, stale_storage: Path) -> None:
+        repo = JsonWorkspaceRepository(path=stale_storage)
+        assert [workspace.id for workspace in repo.list_all()] == ["existing-id"]
+        stored = json.loads(stale_storage.read_text(encoding="utf-8"))
+        assert len(stored) == 2

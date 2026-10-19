@@ -35,4 +35,5 @@ Remove the workspace identified by `workspace_id`. No-op if it does not exist.
 - **Thread safety:** Concurrent reads must not raise. Writes are serialized.
 - **Configurable path:** Storage file location is provided at construction time.
 - **Missing storage:** If storage does not exist, reads return empty results (do not raise).
+- **Stale entries:** Reads skip persisted entries whose path no longer exists or is not a directory (do not raise). Such entries are not deleted.
 - **Single active workspace:** At most one workspace can be active at any time.

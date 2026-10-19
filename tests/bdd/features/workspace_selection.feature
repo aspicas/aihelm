@@ -30,3 +30,10 @@ Feature: Workspace selection
     When I select "project_d" as workspace
     And I select "project_e" as workspace
     Then the active workspace path is "project_e"
+
+  Scenario: Active workspace directory removed before restart
+    Given a candidate directory "project_f" with .git
+    When I select that directory as workspace
+    And the directory "project_f" is removed
+    And I restart workspace services from storage
+    Then there is no active workspace

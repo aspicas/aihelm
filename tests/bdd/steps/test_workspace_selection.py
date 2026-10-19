@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,14 @@ def test_workspace_persists_across_restart() -> None:
     "Selecting a new workspace replaces active workspace",
 )
 def test_select_new_workspace_replaces_active() -> None:
+    pass
+
+
+@scenario(
+    "../features/workspace_selection.feature",
+    "Active workspace directory removed before restart",
+)
+def test_removed_active_workspace_on_restart() -> None:
     pass
 
 
@@ -104,6 +113,15 @@ def select_named_directory(
     context["warning_required"] = not workspace.has_git_dir()
 
 
+@when(parsers.parse('the directory "{name}" is removed'))
+def remove_directory(context: dict[str, object], name: str) -> None:
+    dirs = context["dirs"]
+    assert isinstance(dirs, dict)
+    workspace_path = dirs[name]
+    assert isinstance(workspace_path, Path)
+    shutil.rmtree(workspace_path)
+
+
 @when("I restart workspace services from storage", target_fixture="service")
 def restart_workspace_service(context: dict[str, object]) -> WorkspaceService:
     storage_path = context["storage_path"]
@@ -140,3 +158,9 @@ def no_git_warning_required(context: dict[str, object]) -> None:
 @then("a git warning is required")
 def git_warning_required(context: dict[str, object]) -> None:
     assert context["warning_required"] is True
+
+
+@then("there is no active workspace")
+def no_active_workspace(service: WorkspaceService) -> None:
+    assert service.get_active() is None
+    assert service.get_active_cwd() is None

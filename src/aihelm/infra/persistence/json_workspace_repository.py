@@ -30,6 +30,10 @@ def _dict_to_workspace(data: dict[str, Any]) -> Workspace:
     )
 
 
+def _is_stale(data: dict[str, Any]) -> bool:
+    return not Path(data["path"]).is_dir()
+
+
 class JsonWorkspaceRepository(WorkspaceRepository):
     """WorkspaceRepository backed by a JSON file with atomic writes."""
 
@@ -63,7 +67,7 @@ class JsonWorkspaceRepository(WorkspaceRepository):
         with self._lock:
             items = self._read_all()
         return sorted(
-            (_dict_to_workspace(item) for item in items),
+            (_dict_to_workspace(item) for item in items if not _is_stale(item)),
             key=lambda workspace: workspace.selected_at,
             reverse=True,
         )
@@ -72,7 +76,7 @@ class JsonWorkspaceRepository(WorkspaceRepository):
         with self._lock:
             items = self._read_all()
         for item in items:
-            if bool(item["is_active"]):
+            if bool(item["is_active"]) and not _is_stale(item):
                 return _dict_to_workspace(item)
         return None
 
