@@ -4,6 +4,8 @@
 > capabilities now ship with the assistants themselves. Kept here as a working
 > reference for the design; not under active development.
 
+![AIHelm task queue](docs/screenshot.png)
+
 # AIHelm
 
 Local desktop orchestrator for AI code assistants. Queue prompts, let the AI work autonomously, and review the results when you're ready.
