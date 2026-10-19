@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#232323"/><stop offset="1" stop-color="#121212"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="228" fill="url(#bg)"/>
+  <rect x="2" y="2" width="1020" height="1020" rx="226" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="4"/>
+  <g fill="#0d6efd"><rect x="512" y="495.0" width="250" height="34" transform="rotate(0.0 512 512)"/><rect x="762" y="479.0" width="150" height="66" rx="33.0" transform="rotate(0.0 512 512)"/><rect x="512" y="495.0" width="250" height="34" transform="rotate(45.0 512 512)"/><rect x="762" y="479.0" width="150" height="66" rx="33.0" transform="rotate(45.0 512 512)"/><rect x="512" y="495.0" width="250" height="34" transform="rotate(90.0 512 512)"/><rect x="762" y="479.0" width="150" height="66" rx="33.0" transform="rotate(90.0 512 512)"/><rect x="512" y="495.0" width="250" height="34" transform="rotate(135.0 512 512)"/><rect x="762" y="479.0" width="150" height="66" rx="33.0" transform="rotate(135.0 512 512)"/><rect x="512" y="495.0" width="250" height="34" transform="rotate(180.0 512 512)"/><rect x="762" y="479.0" width="150" height="66" rx="33.0" transform="rotate(180.0 512 512)"/><rect x="512" y="495.0" width="250" height="34" transform="rotate(225.0 512 512)"/><rect x="762" y="479.0" width="150" height="66" rx="33.0" transform="rotate(225.0 512 512)"/><rect x="512" y="495.0" width="250" height="34" transform="rotate(270.0 512 512)"/><rect x="762" y="479.0" width="150" height="66" rx="33.0" transform="rotate(270.0 512 512)"/><rect x="512" y="495.0" width="250" height="34" transform="rotate(315.0 512 512)"/><rect x="762" y="479.0" width="150" height="66" rx="33.0" transform="rotate(315.0 512 512)"/><circle cx="512" cy="512" r="250" fill="none" stroke="#0d6efd" stroke-width="52"/><circle cx="512" cy="512" r="80"/></g><circle cx="512" cy="512" r="48" fill="#121212"/><circle cx="512" cy="512" r="22" fill="#f59e0b"/>
+</svg>
