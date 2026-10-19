@@ -1,3 +1,9 @@
+> **Status — October 2026.** Built earlier this year as a local orchestrator for
+> AI coding assistants, when the available tools did not handle queued execution
+> across Git branches or automatic resumption after a rate limit. Several of those
+> capabilities now ship with the assistants themselves. Kept here as a working
+> reference for the design; not under active development.
+
 # AIHelm
 
 Local desktop orchestrator for AI code assistants. Queue prompts, let the AI work autonomously, and review the results when you're ready.
@@ -6,12 +12,14 @@ Local desktop orchestrator for AI code assistants. Queue prompts, let the AI wor
 
 Working with local AI code assistants (like `claude-code`) is synchronous and fragile. If the AI hits a token rate limit, it stops — and you have to remember to come back hours later to restart it. That kills overnight runs, breaks focus during meetings, and wastes the AI's potential to work unattended.
 
-## What AIHelm Does
+## Design
 
 1. **Queue tasks** — Write multiple prompts, assign a Git branch to each, and add them to a queue.
 2. **Autonomous execution** — AIHelm creates the branch, runs the AI CLI, and captures output in the background.
 3. **Rate limit recovery** — When the AI hits a token limit, AIHelm detects it, pauses the queue, and automatically resumes at a scheduled time (e.g., 1:00 PM or "in 3 hours").
 4. **Visual review** — When tasks finish, you review the code diffs in-app and approve or reject each one before committing.
+
+**Implemented:** step 1 — the task queue (create, edit, delete, JSON persistence), workspace selection, and the Flet desktop UI, with 115 unit and BDD tests. Steps 2–4 are specified in `specs/` and the domain layer but not built.
 
 ## Quick Start
 
@@ -24,9 +32,9 @@ Working with local AI code assistants (like `claude-code`) is synchronous and fr
 ### Installation
 
 ```bash
-git clone https://github.com/<owner>/aihelm.git
+git clone https://github.com/aspicas/aihelm.git
 cd aihelm
-python -m venv .venv
+python3 -m venv .venv       # Windows: python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
@@ -36,6 +44,8 @@ pip install -e ".[dev]"
 ```bash
 python -m aihelm
 ```
+
+The first launch downloads the Flet desktop runtime (one-time, needs network).
 
 ### Run Tests
 
@@ -110,8 +120,9 @@ tests/
 
 ## v1 Scope
 
-**Included:**
-- Local task queue with JSON persistence
+**Planned** (✅ = implemented):
+- ✅ Local task queue with JSON persistence
+- ✅ Workspace selection
 - Sequential task execution via daemon worker thread
 - Git branch management (stash, checkout, branch, diff, commit, reset)
 - Rate limit detection and timed auto-resume
